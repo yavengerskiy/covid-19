@@ -18,8 +18,6 @@ class MainScreenViewController: UIViewController {
     @IBOutlet weak var deathsLabel: UILabel!
     @IBOutlet weak var lastUpdateDateLabel: UILabel!
     
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         networkManager.onComplition = {covidStatistic in
@@ -27,7 +25,6 @@ class MainScreenViewController: UIViewController {
             
         }
         networkManager.fetchCurrentCovidStatistics(forCountry: "Uzbekistan")
-        
     }
     
     @IBAction func searchButtonPressed(_ sender: UIButton) {
@@ -35,8 +32,7 @@ class MainScreenViewController: UIViewController {
         }
     }
 
-    
-    func updateInterfaceWith(statistics: CovidStatistic){
+    func updateInterfaceWith(statistics: CovidStatistic) {
         DispatchQueue.main.async {
             self.countryNameLabet.text = statistics.country
             self.confirmedLabel.text = statistics.confirmedString

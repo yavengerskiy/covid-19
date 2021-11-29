@@ -5,7 +5,7 @@
 //  Created by Beelab on 27/11/21.
 //
 
-struct CovidStatistic{
+struct CovidStatistic {
     
     let country: String
     let confirmed,
@@ -46,7 +46,7 @@ struct CovidStatistic{
         "Updated: \(lastUpdate.split(separator: "T").joined(separator: " ").prefix(19))"
     }
     
-    init?(covidStatisticData: CovidStatisticData){
+    init?(covidStatisticData: CovidStatisticData) {
         country = covidStatisticData.country
         confirmed = covidStatisticData.confirmed
         recovered = covidStatisticData.recovered

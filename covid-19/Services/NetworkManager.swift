@@ -31,7 +31,7 @@ struct NetworkManager {
         }.resume()
     }
     
-    func parseJSON(withData data: Data) -> CovidStatistic?{
+    private func parseJSON(withData data: Data) -> CovidStatistic?{
         do {
             let covidStatisticData: [CovidStatisticData] = try JSONDecoder().decode([CovidStatisticData].self, from: data)
             if let covidStatisticFirstElement = covidStatisticData.first {
