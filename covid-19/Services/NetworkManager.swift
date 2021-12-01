@@ -5,43 +5,36 @@
 //  Created by Beelab on 27/11/21.
 //
 
-import Foundation
+import Alamofire
 
 struct NetworkManager {
     
-    var onComplition: ((CovidStatistic) -> Void)?
+    static let shared = NetworkManager()
     
-    func fetchCurrentCovidStatistics(forCountry country: String){
-        let urlString = urlString + country
-        guard let url = URL(string: urlString) else { return }
-        
-        var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.setValue(rapidapiHost, forHTTPHeaderField: "x-rapidapi-host")
-            request.setValue(rapidapiKey, forHTTPHeaderField: "x-rapidapi-key")
-        
-        URLSession.shared.dataTask(with: request) { data, responce, error in
-            if let data = data {
-                if let covidStatistics = parseJSON(withData: data){
-                    self.onComplition?(covidStatistics)
-                }
-            } else {
-                print(error?.localizedDescription ?? "No error description")
-            }
-        }.resume()
+    private init() {}
+    
+    enum NetworkError: Error {
+        case invalidURL
+        case noData
+        case decodingError
     }
     
-    private func parseJSON(withData data: Data) -> CovidStatistic?{
-        do {
-            let covidStatisticData: [CovidStatisticData] = try JSONDecoder().decode([CovidStatisticData].self, from: data)
-            if let covidStatisticFirstElement = covidStatisticData.first {
-                guard let covidStatistic = CovidStatistic(covidStatisticData: covidStatisticFirstElement) else { return nil }
-                return covidStatistic
+    func fetchDataWithAlamofire(_ url: String, completion: @escaping(Result<CovidStatistic, NetworkError>) -> Void ) {
+        let httpHeaders: HTTPHeaders = ["x-rapidapi-host" : rapidapiHost, "x-rapidapi-key" : rapidapiKey]
+        AF.request(url, headers: httpHeaders)
+           .validate()
+           .responseJSON { dataResponse in  
+            switch dataResponse.result {
+            case .success(let value):
+                guard let statisticsData = value as? [[String: Any]] else { return }
+                
+                guard let statisticData =  statisticsData.first else { return }
+                let covedStatistics = CovidStatistic(statisticData: statisticData)
+                completion(.success(covedStatistics))
+            case .failure:
+                completion(.failure(.decodingError))
             }
-            
-        } catch let error as NSError {
-            print(error.localizedDescription)
         }
-        return nil
+        
     }
 }

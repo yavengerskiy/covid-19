@@ -6,10 +6,10 @@
 //
 
 import UIKit
+import Alamofire
 
 class MainScreenViewController: UIViewController {
 
-    var networkManager = NetworkManager()
     
     @IBOutlet weak var countryNameLabet: UILabel!
     @IBOutlet weak var confirmedLabel: UILabel!
@@ -20,28 +20,33 @@ class MainScreenViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        networkManager.onComplition = {covidStatistic in
-            self.updateInterfaceWith(statistics: covidStatistic)
-            
-        }
-        networkManager.fetchCurrentCovidStatistics(forCountry: "Uzbekistan")
+        self.alamofireManualJSON(url: urlString + "Uzbekistan")
     }
     
     @IBAction func searchButtonPressed(_ sender: UIButton) {
-        self.presentSearchAlertController(withTitle: "Enter country name", message: nil, style: .alert) { countryName in self.networkManager.fetchCurrentCovidStatistics(forCountry: countryName)
+        self.presentSearchAlertController(withTitle: "Enter country name", message: nil, style: .alert) { countryName in
+            self.alamofireManualJSON(url: urlString + countryName)
+        }
+    }
+    
+    private func alamofireManualJSON (url: String) {
+        NetworkManager.shared.fetchDataWithAlamofire(url) { result in
+            switch result {
+            case .success(let covidStatistic):
+                self.updateInterfaceWith(statistics: covidStatistic)
+            case .failure(let error):
+                print(error)
+            }
         }
     }
 
-    func updateInterfaceWith(statistics: CovidStatistic) {
-        DispatchQueue.main.async {
-            self.countryNameLabet.text = statistics.country
-            self.confirmedLabel.text = statistics.confirmedString
-            self.recoveredLabel.text = String(statistics.recoveredString)
-            self.deathsLabel.text = String(statistics.deathsString)
-            self.criticalLabel.text = String(statistics.criticalString)
-            self.lastUpdateDateLabel.text = statistics.lastUpdateString
-        }
-        
+    private func updateInterfaceWith(statistics: CovidStatistic) {
+        self.countryNameLabet.text = statistics.country
+        self.confirmedLabel.text = statistics.confirmedString
+        self.recoveredLabel.text = String(statistics.recoveredString)
+        self.deathsLabel.text = String(statistics.deathsString)
+        self.criticalLabel.text = String(statistics.criticalString)
+        self.lastUpdateDateLabel.text = statistics.lastUpdateString
     }
 }
 
